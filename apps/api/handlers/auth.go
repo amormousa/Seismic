@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"strings"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -12,10 +13,9 @@ import (
 )
 
 type AuthHandler struct {
-	Pool           *pgxpool.Pool
-	EmailCfg       services.EmailConfig
-	JWTSecret      string
-	JWTExpiryHours int
+	Pool      *pgxpool.Pool
+	EmailCfg  services.EmailConfig
+	JWTSecret string
 }
 
 type magicLinkRequest struct {
@@ -86,6 +86,7 @@ func (h *AuthHandler) VerifyMagicLink(c *fiber.Ctx) error {
 		return helpers.Error(c, fiber.StatusInternalServerError, "Something went wrong")
 	}
 
+	// New user, needs to pick a username before account is created
 	if user == nil {
 		signupToken, err := generateSignupToken(link.Email, h.JWTSecret)
 		if err != nil {
@@ -98,15 +99,22 @@ func (h *AuthHandler) VerifyMagicLink(c *fiber.Ctx) error {
 		})
 	}
 
-	jwtToken, err := generateJWT(user.ID, h.JWTSecret, h.JWTExpiryHours)
+	// Existing user, log in normally
+	accessToken, err := generateJWT(user.ID, h.JWTSecret)
 	if err != nil {
 		return helpers.Error(c, fiber.StatusInternalServerError, "Failed to create session")
 	}
 
+	refreshToken, err := models.CreateRefreshToken(ctx, h.Pool, user.ID)
+	if err != nil {
+		return helpers.Error(c, fiber.StatusInternalServerError, "Failed to create session")
+	}
+	setRefreshTokenCookie(c, refreshToken)
+
 	return helpers.Success(c, "Logged in successfully", fiber.Map{
-		"newUser": false,
-		"token":   jwtToken,
-		"user":    user,
+		"newUser":     false,
+		"accessToken": accessToken,
+		"user":        user,
 	})
 }
 
@@ -147,13 +155,72 @@ func (h *AuthHandler) CompleteSignup(c *fiber.Ctx) error {
 		return helpers.Error(c, fiber.StatusInternalServerError, "Failed to create account")
 	}
 
-	jwtToken, err := generateJWT(user.ID, h.JWTSecret, h.JWTExpiryHours)
+	accessToken, err := generateJWT(user.ID, h.JWTSecret)
 	if err != nil {
 		return helpers.Error(c, fiber.StatusInternalServerError, "Failed to create session")
 	}
 
+	refreshToken, err := models.CreateRefreshToken(ctx, h.Pool, user.ID)
+	if err != nil {
+		return helpers.Error(c, fiber.StatusInternalServerError, "Failed to create session")
+	}
+	setRefreshTokenCookie(c, refreshToken)
+
 	return helpers.Success(c, "Account created", fiber.Map{
-		"token": jwtToken,
-		"user":  user,
+		"accessToken": accessToken,
+		"user":        user,
+	})
+}
+
+// RefreshAccessToken handles POST /api/auth/refresh.
+// Reads the refresh token from an httpOnly cookie, validates
+// it, issues a new access token, and rotates the refresh token.
+func (h *AuthHandler) RefreshAccessToken(c *fiber.Ctx) error {
+	rawToken := c.Cookies("refresh_token")
+	if rawToken == "" {
+		return helpers.Error(c, fiber.StatusUnauthorized, "No refresh token provided")
+	}
+
+	ctx := c.Context()
+
+	stored, err := models.FindValidRefreshToken(ctx, h.Pool, rawToken)
+	if err != nil {
+		return helpers.Error(c, fiber.StatusInternalServerError, "Something went wrong")
+	}
+	if stored == nil {
+		return helpers.Error(c, fiber.StatusUnauthorized, "Invalid or expired refresh token")
+	}
+
+	if err := models.RevokeRefreshToken(ctx, h.Pool, stored.ID); err != nil {
+		return helpers.Error(c, fiber.StatusInternalServerError, "Something went wrong")
+	}
+
+	newRawToken, err := models.CreateRefreshToken(ctx, h.Pool, stored.UserID)
+	if err != nil {
+		return helpers.Error(c, fiber.StatusInternalServerError, "Something went wrong")
+	}
+	setRefreshTokenCookie(c, newRawToken)
+
+	accessToken, err := generateJWT(stored.UserID, h.JWTSecret)
+	if err != nil {
+		return helpers.Error(c, fiber.StatusInternalServerError, "Something went wrong")
+	}
+
+	return helpers.Success(c, "Token refreshed", fiber.Map{
+		"accessToken": accessToken,
+	})
+}
+
+// setRefreshTokenCookie sets the refresh token as an httpOnly
+// cookie so client-side JavaScript can never read it directly.
+func setRefreshTokenCookie(c *fiber.Ctx, token string) {
+	c.Cookie(&fiber.Cookie{
+		Name:     "refresh_token",
+		Value:    token,
+		HTTPOnly: true,
+		Secure:   true,
+		SameSite: "Strict",
+		Path:     "/api/auth",
+		Expires:  time.Now().Add(30 * 24 * time.Hour),
 	})
 }
