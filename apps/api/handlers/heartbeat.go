@@ -1,0 +1,56 @@
+// handlers/heartbeat.go
+package handlers
+
+import (
+	"log"
+	"time"
+
+	"github.com/gofiber/fiber/v2"
+	"github.com/jackc/pgx/v5/pgxpool"
+
+	"github.com/majoramari/seismic/apps/api/helpers"
+	"github.com/majoramari/seismic/apps/api/models"
+)
+
+type HeartbeatHandler struct {
+	Pool *pgxpool.Pool
+}
+
+// Receive Validates and stores a heartbeat sent by an editor plugin.
+func (h *HeartbeatHandler) Receive(c *fiber.Ctx) error {
+	var hb models.Heartbeat
+	if err := c.BodyParser(&hb); err != nil {
+		return helpers.Error(c, fiber.StatusBadRequest, "Invalid request body")
+	}
+
+	if hb.File == "" || hb.Project == "" || hb.Language == "" || hb.Editor == "" {
+		return helpers.Error(c, fiber.StatusBadRequest, "Missing required fields")
+	}
+
+	now := time.Now().UnixMilli()
+	if hb.Time > now+2*60*1000 {
+		return helpers.Error(c, fiber.StatusBadRequest, "Timestamp too far in the future")
+	}
+	if hb.Time < now-5*60*1000 {
+		return helpers.Error(c, fiber.StatusBadRequest, "Timestamp too far in the past")
+	}
+
+	userID := c.Locals("userID").(string)
+	ctx := c.Context()
+
+	isDuplicate, err := models.HasRecentDuplicate(ctx, h.Pool, userID, hb.File, hb.Time)
+	if err != nil {
+		log.Println("HasRecentDuplicate error:", err)
+		return helpers.Error(c, fiber.StatusInternalServerError, "Something went wrong")
+	}
+	if isDuplicate {
+		return helpers.Success(c, "Duplicate heartbeat ignored", nil)
+	}
+
+	if err := models.InsertHeartbeat(ctx, h.Pool, userID, hb); err != nil {
+		log.Println("InsertHeartbeat error:", err)
+		return helpers.Error(c, fiber.StatusInternalServerError, "Failed to save heartbeat")
+	}
+
+	return helpers.Success(c, "Heartbeat received", nil)
+}
