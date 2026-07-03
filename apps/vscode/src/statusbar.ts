@@ -52,20 +52,26 @@ export class StatusBarManager {
       this.item.text = `$(clock) ${this.formatSeconds(seconds)}`;
       this.item.tooltip = "Today's coding time on Seismic\nClick to open dashboard";
       this.item.command = 'seismic.openDashboard';
-    } catch {
+   } catch (err) {
+      console.error('Seismic status bar error:', err);
       this.item.text = '$(warning) Seismic';
       this.item.tooltip = 'Could not connect to Seismic';
     }
   }
 
-  private async fetchTodaySeconds(): Promise<number> {
-    const res = await fetch(`${config.getApiUrl()}/api/stats/summary?range=today`, {
-      headers: { Authorization: `Bearer ${config.getApiKey()}` },
-    });
-    if (!res.ok) throw new Error('failed to fetch stats');
-    const data = (await res.json()) as { totalSeconds: number };
-    return data.totalSeconds;
-  }
+private async fetchTodaySeconds(): Promise<number> {
+  const res = await fetch(`${config.getApiUrl()}/api/stats/summary?range=today`, {
+    headers: { Authorization: `Bearer ${config.getApiKey()}` },
+  });
+  if (!res.ok) throw new Error('failed to fetch stats');
+
+  const json = (await res.json()) as {
+    success: boolean;
+    data: { totalSeconds: number };
+  };
+
+  return json.data.totalSeconds;
+}
 
   private formatSeconds(seconds: number): string {
     if (seconds < 60) return '< 1m';
