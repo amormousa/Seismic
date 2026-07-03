@@ -2,7 +2,9 @@
 package main
 
 import (
+	"context"
 	"log"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
 
@@ -37,8 +39,22 @@ func main() {
 	}
 
 	heartbeatHandler := &handlers.HeartbeatHandler{Pool: pool}
+	adminHandler := &handlers.AdminHandler{Pool: pool}
+	statsHandler := &handlers.StatsHandler{Pool: pool}
 
-	routes.Setup(app, authHandler, heartbeatHandler, cfg.JWTSecret, pool)
+	routes.Setup(app, authHandler, heartbeatHandler, adminHandler, statsHandler, cfg.JWTSecret, pool)
+
+	// First time with Multithreading Yaaay
+	// This help a lot: https://go.dev/tour/concurrency/2
+	go func() {
+		ticker := time.NewTicker(5 * time.Minute)
+		defer ticker.Stop()
+		for range ticker.C {
+			if err := services.ProcessSessions(context.Background(), pool); err != nil {
+				log.Println("Session processor error:", err)
+			}
+		}
+	}()
 
 	log.Printf("Seismic API starting on port %s\n", cfg.Port)
 	if err := app.Listen(":" + cfg.Port); err != nil {
