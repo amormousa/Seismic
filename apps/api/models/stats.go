@@ -2,6 +2,7 @@ package models
 
 import (
 	"context"
+	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -12,6 +13,16 @@ type StatsSummary struct {
 	TopProject    *string `json:"topProject"`
 	DailyAverage  int     `json:"dailyAverage"`
 	CurrentStreak int     `json:"currentStreak"`
+}
+
+type LanguageStat struct {
+	Language string `json:"language"`
+	Seconds  int    `json:"seconds"`
+}
+
+type HeatmapDay struct {
+	Date    string `json:"date"`
+	Seconds int    `json:"seconds"`
 }
 
 // GetStatsSummary calculates total time, top language, top
@@ -69,4 +80,55 @@ func RangeSQL(rangeParam string) string {
 	default:
 		return "1=1" // "all" — no filter
 	}
+}
+
+// GetLanguageBreakdown returns time spent per language.
+func GetLanguageBreakdown(ctx context.Context, pool *pgxpool.Pool, userID string, rangeSQL string) ([]LanguageStat, error) {
+	rows, err := pool.Query(ctx, `
+		SELECT language, SUM(duration_seconds) as seconds
+		FROM sessions
+		WHERE user_id = $1 AND `+rangeSQL+`
+		GROUP BY language
+		ORDER BY seconds DESC
+	`, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var stats []LanguageStat
+	for rows.Next() {
+		var s LanguageStat
+		if err := rows.Scan(&s.Language, &s.Seconds); err != nil {
+			return nil, err
+		}
+		stats = append(stats, s)
+	}
+	return stats, nil
+}
+
+// GetHeatmap returns daily totals for the last 365 days.
+func GetHeatmap(ctx context.Context, pool *pgxpool.Pool, userID string) ([]HeatmapDay, error) {
+	rows, err := pool.Query(ctx, `
+		SELECT start_time::date as day, SUM(duration_seconds) as seconds
+		FROM sessions
+		WHERE user_id = $1 AND start_time >= CURRENT_DATE - INTERVAL '365 days'
+		GROUP BY day
+		ORDER BY day ASC
+	`, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var days []HeatmapDay
+	for rows.Next() {
+		var day time.Time
+		var seconds int
+		if err := rows.Scan(&day, &seconds); err != nil {
+			return nil, err
+		}
+		days = append(days, HeatmapDay{Date: day.Format("2006-01-02"), Seconds: seconds})
+	}
+	return days, nil
 }
