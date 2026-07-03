@@ -3,22 +3,20 @@ package config
 import (
 	"log"
 	"os"
-	"strconv"
 
 	"github.com/joho/godotenv"
 )
 
 // Config holds all the settings that seismic needs, loaded at startup from the env vars
 type Config struct {
-	DatabaseURL    string
-	JWTSecret      string
-	JWTExpiryHours int
-	Port           string
-	SMTPHost       string
-	SMTPPort       string
-	SMTPUser       string
-	SMTPPass       string
-	AppURL         string
+	DatabaseURL string
+	JWTSecret   string
+	Port        string
+	SMTPHost    string
+	SMTPPort    string
+	SMTPUser    string
+	SMTPPass    string
+	AppURL      string
 }
 
 // Load reads the .env file (if exist) and returns a Config struct
@@ -28,21 +26,15 @@ func Load() *Config {
 		log.Println("No .env file found, reading from environment directly")
 	}
 
-	jwtExpiryHours, err := strconv.Atoi(os.Getenv("JWT_EXPIRY_HOURS"))
-	if err != nil || jwtExpiryHours == 0 {
-		jwtExpiryHours = 24
-	}
-
 	cfg := &Config{
-		DatabaseURL:    os.Getenv("DATABASE_URL"),
-		JWTSecret:      os.Getenv("JWT_SECRET"),
-		JWTExpiryHours: jwtExpiryHours,
-		Port:           os.Getenv("PORT"),
-		SMTPHost:       os.Getenv("SMTP_HOST"),
-		SMTPPort:       os.Getenv("SMTP_PORT"),
-		SMTPUser:       os.Getenv("SMTP_USER"),
-		SMTPPass:       os.Getenv("SMTP_PASS"),
-		AppURL:         os.Getenv("APP_URL"),
+		DatabaseURL: os.Getenv("DATABASE_URL"),
+		JWTSecret:   os.Getenv("JWT_SECRET"),
+		Port:        os.Getenv("PORT"),
+		SMTPHost:    os.Getenv("SMTP_HOST"),
+		SMTPPort:    os.Getenv("SMTP_PORT"),
+		SMTPUser:    os.Getenv("SMTP_USER"),
+		SMTPPass:    os.Getenv("SMTP_PASS"),
+		AppURL:      os.Getenv("APP_URL"),
 	}
 
 	if cfg.DatabaseURL == "" {
