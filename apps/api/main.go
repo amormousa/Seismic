@@ -1,12 +1,15 @@
+// main.go
 package main
 
 import (
 	"log"
 
 	"github.com/gofiber/fiber/v2"
+
 	"github.com/majoramari/seismic/apps/api/config"
 	"github.com/majoramari/seismic/apps/api/db"
 	"github.com/majoramari/seismic/apps/api/handlers"
+	"github.com/majoramari/seismic/apps/api/routes"
 	"github.com/majoramari/seismic/apps/api/services"
 )
 
@@ -21,12 +24,9 @@ func main() {
 
 	app := fiber.New()
 
-	app.Get("/health", func(c *fiber.Ctx) error {
-		return c.JSON(fiber.Map{"status": "ok"})
-	})
-
 	authHandler := &handlers.AuthHandler{
-		Pool: pool,
+		Pool:      pool,
+		JWTSecret: cfg.JWTSecret,
 		EmailCfg: services.EmailConfig{
 			Host:     cfg.SMTPHost,
 			Port:     cfg.SMTPPort,
@@ -36,7 +36,7 @@ func main() {
 		},
 	}
 
-	app.Post("/api/auth/magic-link", authHandler.RequestMagicLink)
+	routes.Setup(app, authHandler)
 
 	log.Printf("Seismic API starting on port %s\n", cfg.Port)
 	if err := app.Listen(":" + cfg.Port); err != nil {
