@@ -36,7 +36,9 @@ func main() {
 		},
 	}
 
-	routes.Setup(app, authHandler)
+	heartbeatHandler := &handlers.HeartbeatHandler{Pool: pool}
+
+	routes.Setup(app, authHandler, heartbeatHandler, cfg.JWTSecret, pool)
 
 	log.Printf("Seismic API starting on port %s\n", cfg.Port)
 	if err := app.Listen(":" + cfg.Port); err != nil {
