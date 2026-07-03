@@ -7,14 +7,24 @@ import (
 	"time"
 
 	"github.com/gofiber/fiber/v2"
+	fiberSwagger "github.com/gofiber/swagger"
 
 	"github.com/majoramari/seismic/apps/api/config"
 	"github.com/majoramari/seismic/apps/api/db"
+	_ "github.com/majoramari/seismic/apps/api/docs"
 	"github.com/majoramari/seismic/apps/api/handlers"
 	"github.com/majoramari/seismic/apps/api/routes"
 	"github.com/majoramari/seismic/apps/api/services"
 )
 
+// @title Seismic API
+// @version 1.0
+// @description Backend API for Seismic, a developer time tracking platform.
+// @contact.email hello@seismic.icu
+// @BasePath /
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
 func main() {
 	cfg := config.Load()
 	pool := db.Connect(cfg.DatabaseURL)
@@ -25,6 +35,7 @@ func main() {
 	}
 
 	app := fiber.New()
+	app.Get("/api/docs/*", fiberSwagger.New())
 
 	authHandler := &handlers.AuthHandler{
 		Pool:      pool,

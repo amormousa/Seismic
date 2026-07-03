@@ -1,0 +1,200 @@
+basePath: /
+definitions:
+  handlers.completeSignupRequest:
+    properties:
+      displayName:
+        type: string
+      signupToken:
+        type: string
+      username:
+        type: string
+    type: object
+  handlers.magicLinkRequest:
+    properties:
+      email:
+        type: string
+    type: object
+  helpers.APIResponse:
+    properties:
+      data: {}
+      message:
+        type: string
+      success:
+        type: boolean
+    type: object
+info:
+  contact:
+    email: hello@seismic.icu
+  description: Backend API for Seismic, a developer time tracking platform.
+  title: Seismic API
+  version: "1.0"
+paths:
+  /api/auth/apikey:
+    get:
+      description: Returns the logged-in user's API key, used to configure editor
+        plugins.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/helpers.APIResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/helpers.APIResponse'
+      security:
+      - BearerAuth: []
+      summary: Get API key
+      tags:
+      - auth
+  /api/auth/apikey/regenerate:
+    post:
+      description: Replaces the user's API key, invalidating any editor plugins still
+        using the old one.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/helpers.APIResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/helpers.APIResponse'
+      security:
+      - BearerAuth: []
+      summary: Regenerate API key
+      tags:
+      - auth
+  /api/auth/complete-signup:
+    post:
+      consumes:
+      - application/json
+      description: Creates the account using the signup token from VerifyMagicLink,
+        once a username is chosen.
+      parameters:
+      - description: Signup details
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.completeSignupRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/helpers.APIResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/helpers.APIResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/helpers.APIResponse'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/helpers.APIResponse'
+      summary: Complete signup for a new user
+      tags:
+      - auth
+  /api/auth/magic-link:
+    post:
+      consumes:
+      - application/json
+      description: Sends a login link to the given email. Works for both new and existing
+        users.
+      parameters:
+      - description: Email address
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.magicLinkRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/helpers.APIResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/helpers.APIResponse'
+      summary: Request a magic link
+      tags:
+      - auth
+  /api/auth/refresh:
+    post:
+      description: Uses the refresh token cookie to issue a new access token and rotate
+        the refresh token.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/helpers.APIResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/helpers.APIResponse'
+      summary: Refresh access token
+      tags:
+      - auth
+  /api/auth/verify:
+    get:
+      description: Validates the token from the login email. Logs in existing users,
+        or returns a signup token for new users.
+      parameters:
+      - description: Magic link token
+        in: query
+        name: token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/helpers.APIResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/helpers.APIResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/helpers.APIResponse'
+      summary: Verify a magic link token
+      tags:
+      - auth
+  /health:
+    get:
+      description: Returns ok if the server is running
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Health check
+      tags:
+      - system
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

@@ -9,10 +9,7 @@ import (
 )
 
 func Setup(app *fiber.App, authHandler *handlers.AuthHandler, heartbeatHandler *handlers.HeartbeatHandler, adminHandler *handlers.AdminHandler, statsHandler *handlers.StatsHandler, jwtSecret string, pool *pgxpool.Pool) {
-	app.Get("/health", func(c *fiber.Ctx) error {
-		return c.JSON(fiber.Map{"status": "ok"})
-	})
-
+	app.Get("/health", handlers.HealthCheck)
 	auth := app.Group("/api/auth")
 	auth.Post("/magic-link", authHandler.RequestMagicLink)
 	auth.Get("/verify", authHandler.VerifyMagicLink)
@@ -24,6 +21,8 @@ func Setup(app *fiber.App, authHandler *handlers.AuthHandler, heartbeatHandler *
 	app.Post("/api/heartbeat", middleware.RequireAPIKey(pool), heartbeatHandler.Receive)
 	stats := app.Group("/api/stats", middleware.RequireAuthOrAPIKey(pool, jwtSecret))
 	stats.Get("/summary", statsHandler.GetSummary)
+	stats.Get("/languages", statsHandler.GetLanguages)
+	stats.Get("/heatmap", statsHandler.GetHeatmap)
 
 	// This is a testing route, not for production use
 	app.Post("/api/admin/process-sessions", middleware.RequireAuth(jwtSecret), adminHandler.TriggerSessionProcessing)

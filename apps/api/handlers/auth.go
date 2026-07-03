@@ -22,8 +22,16 @@ type magicLinkRequest struct {
 	Email string `json:"email"`
 }
 
-// RequestMagicLink Creates a login token tied to the email and sends it,
-// regardless of whether the user already exists.
+// RequestMagicLink godoc
+// @Summary      Request a magic link
+// @Description  Sends a login link to the given email. Works for both new and existing users.
+// @Tags         auth
+// @Accept       json
+// @Produce      json
+// @Param        body body magicLinkRequest true "Email address"
+// @Success      200 {object} helpers.APIResponse
+// @Failure      400 {object} helpers.APIResponse
+// @Router       /api/auth/magic-link [post]
 func (h *AuthHandler) RequestMagicLink(c *fiber.Ctx) error {
 	var body magicLinkRequest
 	if err := c.BodyParser(&body); err != nil {
@@ -50,9 +58,16 @@ func (h *AuthHandler) RequestMagicLink(c *fiber.Ctx) error {
 	return helpers.Success(c, "Check your email for a login link", nil)
 }
 
-// VerifyMagicLink Validates the token. If the user already exists, logs them
-// in. If not, returns a signup token so the frontend can show
-// an onboarding screen to pick a username.
+// VerifyMagicLink godoc
+// @Summary      Verify a magic link token
+// @Description  Validates the token from the login email. Logs in existing users, or returns a signup token for new users.
+// @Tags         auth
+// @Produce      json
+// @Param        token query string true "Magic link token"
+// @Success      200 {object} helpers.APIResponse
+// @Failure      400 {object} helpers.APIResponse
+// @Failure      401 {object} helpers.APIResponse
+// @Router       /api/auth/verify [get]
 func (h *AuthHandler) VerifyMagicLink(c *fiber.Ctx) error {
 	token := c.Query("token")
 	if token == "" {
@@ -122,8 +137,18 @@ type completeSignupRequest struct {
 	DisplayName string `json:"displayName"`
 }
 
-// CompleteSignup Finishes creating the account once a new user picks a
-// username, using the signup token from VerifyMagicLink.
+// CompleteSignup godoc
+// @Summary      Complete signup for a new user
+// @Description  Creates the account using the signup token from VerifyMagicLink, once a username is chosen.
+// @Tags         auth
+// @Accept       json
+// @Produce      json
+// @Param        body body completeSignupRequest true "Signup details"
+// @Success      200 {object} helpers.APIResponse
+// @Failure      400 {object} helpers.APIResponse
+// @Failure      401 {object} helpers.APIResponse
+// @Failure      409 {object} helpers.APIResponse
+// @Router       /api/auth/complete-signup [post]
 func (h *AuthHandler) CompleteSignup(c *fiber.Ctx) error {
 	var body completeSignupRequest
 	if err := c.BodyParser(&body); err != nil {
@@ -169,8 +194,14 @@ func (h *AuthHandler) CompleteSignup(c *fiber.Ctx) error {
 	})
 }
 
-// RefreshAccessToken Reads the refresh token from an httpOnly cookie, validates
-// it, issues a new access token, and rotates the refresh token.
+// RefreshAccessToken godoc
+// @Summary      Refresh access token
+// @Description  Uses the refresh token cookie to issue a new access token and rotate the refresh token.
+// @Tags         auth
+// @Produce      json
+// @Success      200 {object} helpers.APIResponse
+// @Failure      401 {object} helpers.APIResponse
+// @Router       /api/auth/refresh [post]
 func (h *AuthHandler) RefreshAccessToken(c *fiber.Ctx) error {
 	rawToken := c.Cookies("refresh_token")
 	if rawToken == "" {
@@ -221,7 +252,15 @@ func setRefreshTokenCookie(c *fiber.Ctx, token string) {
 	})
 }
 
-// GetAPIKey Returns the logged-in user's API key
+// GetAPIKey godoc
+// @Summary      Get API key
+// @Description  Returns the logged-in user's API key, used to configure editor plugins.
+// @Tags         auth
+// @Produce      json
+// @Security     BearerAuth
+// @Success      200 {object} helpers.APIResponse
+// @Failure      401 {object} helpers.APIResponse
+// @Router       /api/auth/apikey [get]
 func (h *AuthHandler) GetAPIKey(c *fiber.Ctx) error {
 	userID := c.Locals("userID").(string)
 
@@ -236,8 +275,15 @@ func (h *AuthHandler) GetAPIKey(c *fiber.Ctx) error {
 	})
 }
 
-// RegenerateAPIKey Replaces the user's API key, invalidating any
-// plugins that still using the old one.
+// RegenerateAPIKey godoc
+// @Summary      Regenerate API key
+// @Description  Replaces the user's API key, invalidating any editor plugins still using the old one.
+// @Tags         auth
+// @Produce      json
+// @Security     BearerAuth
+// @Success      200 {object} helpers.APIResponse
+// @Failure      401 {object} helpers.APIResponse
+// @Router       /api/auth/apikey/regenerate [post]
 func (h *AuthHandler) RegenerateAPIKey(c *fiber.Ctx) error {
 	userID := c.Locals("userID").(string)
 
