@@ -12,7 +12,16 @@ type StatsHandler struct {
 	Pool *pgxpool.Pool
 }
 
-// GetSummary handles GET /api/stats/summary?range=today|week|month|all
+// GetSummary godoc
+// @Summary      Get stats summary
+// @Description  Returns total time, top language, top project, daily average, and current streak for a time range.
+// @Tags         stats
+// @Produce      json
+// @Security     BearerAuth
+// @Param        range query string false "today, week, month, or all" default(today)
+// @Success      200 {object} helpers.APIResponse
+// @Failure      401 {object} helpers.APIResponse
+// @Router       /api/stats/summary [get]
 func (h *StatsHandler) GetSummary(c *fiber.Ctx) error {
 	userID := c.Locals("userID").(string)
 	rangeParam := c.Query("range", "today")
@@ -26,6 +35,16 @@ func (h *StatsHandler) GetSummary(c *fiber.Ctx) error {
 	return helpers.Success(c, "Stats retrieved", summary)
 }
 
+// GetLanguages godoc
+// @Summary      Get language breakdown
+// @Description  Returns time spent per programming language for a time range.
+// @Tags         stats
+// @Produce      json
+// @Security     BearerAuth
+// @Param        range query string false "today, week, month, or all" default(week)
+// @Success      200 {object} helpers.APIResponse
+// @Failure      401 {object} helpers.APIResponse
+// @Router       /api/stats/languages [get]
 func (h *StatsHandler) GetLanguages(c *fiber.Ctx) error {
 	userID := c.Locals("userID").(string)
 	rangeParam := c.Query("range", "week")
@@ -39,6 +58,15 @@ func (h *StatsHandler) GetLanguages(c *fiber.Ctx) error {
 	return helpers.Success(c, "Language breakdown retrieved", stats)
 }
 
+// GetHeatmap godoc
+// @Summary      Get coding heatmap
+// @Description  Returns daily coding totals for the last 365 days, like a GitHub contribution graph.
+// @Tags         stats
+// @Produce      json
+// @Security     BearerAuth
+// @Success      200 {object} helpers.APIResponse
+// @Failure      401 {object} helpers.APIResponse
+// @Router       /api/stats/heatmap [get]
 func (h *StatsHandler) GetHeatmap(c *fiber.Ctx) error {
 	userID := c.Locals("userID").(string)
 

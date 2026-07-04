@@ -1,4 +1,3 @@
-// handlers/heartbeat.go
 package handlers
 
 import (
@@ -16,7 +15,18 @@ type HeartbeatHandler struct {
 	Pool *pgxpool.Pool
 }
 
-// Receive Validates and stores a heartbeat sent by an editor plugin.
+// Receive godoc
+// @Summary      Send a heartbeat
+// @Description  Called by editor plugins every 2 minutes to record coding activity. Requires an API key, not a JWT.
+// @Tags         heartbeat
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        body body models.Heartbeat true "Heartbeat payload"
+// @Success      200 {object} helpers.APIResponse
+// @Failure      400 {object} helpers.APIResponse
+// @Failure      401 {object} helpers.APIResponse
+// @Router       /api/heartbeat [post]
 func (h *HeartbeatHandler) Receive(c *fiber.Ctx) error {
 	var hb models.Heartbeat
 	if err := c.BodyParser(&hb); err != nil {
