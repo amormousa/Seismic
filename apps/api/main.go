@@ -7,6 +7,10 @@ import (
 	"time"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
+	"github.com/gofiber/fiber/v2/middleware/helmet"
+	"github.com/gofiber/fiber/v2/middleware/logger"
+	"github.com/gofiber/fiber/v2/middleware/recover"
 	fiberSwagger "github.com/gofiber/swagger"
 
 	"github.com/majoramari/seismic/apps/api/config"
@@ -35,6 +39,17 @@ func main() {
 	}
 
 	app := fiber.New()
+
+	app.Use(recover.New())
+	app.Use(logger.New())
+	app.Use(helmet.New())
+	app.Use(cors.New(cors.Config{
+		AllowOrigins:     cfg.AllowedOrigins,
+		AllowHeaders:     "Origin, Content-Type, Accept, Authorization",
+		AllowMethods:     "GET, POST, PUT, DELETE, OPTIONS",
+		AllowCredentials: true,
+	}))
+
 	app.Get("/api/docs/*", fiberSwagger.New())
 
 	authHandler := &handlers.AuthHandler{
@@ -48,15 +63,12 @@ func main() {
 			AppURL:   cfg.AppURL,
 		},
 	}
-
 	heartbeatHandler := &handlers.HeartbeatHandler{Pool: pool}
 	adminHandler := &handlers.AdminHandler{Pool: pool}
 	statsHandler := &handlers.StatsHandler{Pool: pool}
 
 	routes.Setup(app, authHandler, heartbeatHandler, adminHandler, statsHandler, cfg.JWTSecret, pool)
 
-	// First time with Multithreading Yaaay
-	// This help a lot: https://go.dev/tour/concurrency/2
 	go func() {
 		ticker := time.NewTicker(5 * time.Minute)
 		defer ticker.Stop()
