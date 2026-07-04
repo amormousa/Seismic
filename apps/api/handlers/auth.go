@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"regexp"
 	"strings"
 	"time"
 
@@ -164,6 +165,9 @@ func (h *AuthHandler) CompleteSignup(c *fiber.Ctx) error {
 	if username == "" {
 		return helpers.Error(c, fiber.StatusBadRequest, "Username is required")
 	}
+	if !isValidUsername(username) {
+		return helpers.Error(c, fiber.StatusBadRequest, "Username must be 3-20 characters, start with a letter, and contain only lowercase letters, numbers, underscore, or hyphen")
+	}
 
 	ctx := c.Context()
 
@@ -295,5 +299,50 @@ func (h *AuthHandler) RegenerateAPIKey(c *fiber.Ctx) error {
 
 	return helpers.Success(c, "API key regenerated", fiber.Map{
 		"apiKey": newKey,
+	})
+}
+
+var usernameRegex = regexp.MustCompile(`^[a-z][a-z0-9_-]{2,19}$`)
+
+// isValidUsername checks the username matches our rules:
+// starts with a letter, 3-20 chars, lowercase letters,
+// numbers, underscore, and hyphen only.
+func isValidUsername(username string) bool {
+	return usernameRegex.MatchString(username)
+}
+
+// CheckUsername godoc
+// @Summary      Check username availability
+// @Description  Checks if a username is valid and not already taken.
+// @Tags         auth
+// @Produce      json
+// @Param        username query string true "Username to check"
+// @Success      200 {object} helpers.APIResponse
+// @Router       /api/auth/check-username [get]
+func (h *AuthHandler) CheckUsername(c *fiber.Ctx) error {
+	username := strings.TrimSpace(strings.ToLower(c.Query("username")))
+
+	if !isValidUsername(username) {
+		return helpers.Success(c, "Invalid format", fiber.Map{
+			"available": false,
+			"reason":    "invalid_format",
+		})
+	}
+
+	ctx := c.Context()
+	existing, err := models.FindUserByUsername(ctx, h.Pool, username)
+	if err != nil {
+		return helpers.Error(c, fiber.StatusInternalServerError, "Something went wrong")
+	}
+
+	if existing != nil {
+		return helpers.Success(c, "Username taken", fiber.Map{
+			"available": false,
+			"reason":    "taken",
+		})
+	}
+
+	return helpers.Success(c, "Username available", fiber.Map{
+		"available": true,
 	})
 }
