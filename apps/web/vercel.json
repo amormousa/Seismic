@@ -1,5 +1,5 @@
 {
-  "buildCommand": "ng build",
+  "buildCommand": "ng build --configuration production",
   "outputDirectory": "dist/web/browser",
   "rewrites": [
     {
