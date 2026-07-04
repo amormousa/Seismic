@@ -1,4 +1,6 @@
 {
+  "buildCommand": "ng build",
+  "outputDirectory": "dist/web/browser",
   "rewrites": [
     {
       "source": "/(.*)",
