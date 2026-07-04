@@ -1,4 +1,28 @@
 <div class="page">
-  <h1>Dashboard</h1>
-  <p>real stats will show here.</p>
+  <div class="flex" style="justify-content: space-between; align-items: center;">
+    <h1>Dashboard</h1>
+    <button class="btn-ghost" (click)="logout()">Logout</button>
+  </div>
+
+  @if (loading()) {
+    <p>Loading stats...</p>
+  } @else if (stats()) {
+    <div class="card">
+      <p class="text-muted">Today's coding time</p>
+      <h2>{{ formatSeconds(stats()!.totalSeconds) }}</h2>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <p class="text-muted">Top language</p>
+        <p>{{ stats()!.topLanguage ?? '—' }}</p>
+      </div>
+      <div class="card">
+        <p class="text-muted">Top project</p>
+        <p>{{ stats()!.topProject ?? '—' }}</p>
+      </div>
+    </div>
+  } @else {
+    <p>No data yet. Start coding to see your stats!</p>
+  }
 </div>
