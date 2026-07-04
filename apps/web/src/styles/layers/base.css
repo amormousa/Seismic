@@ -1,0 +1,39 @@
+body {
+  background: var(--color-bg);
+  color: var(--color-text);
+  /*noinspection CssNoGenericFontName*/
+  font-family: var(--font-sans);
+}
+
+:where(code, pre) {
+  /*noinspection CssNoGenericFontName*/
+  font-family: var(--font-mono);
+}
+
+a:any-link {
+  color: var(--color-accent);
+  text-decoration: none;
+}
+
+:where(h1, h2, h3, h4, h5, h6) {
+  line-height: 1.2;
+  font-weight: 600;
+}
+
+::selection {
+  background: var(--color-accent-glow);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
