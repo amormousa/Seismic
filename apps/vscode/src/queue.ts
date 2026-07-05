@@ -26,7 +26,7 @@ export class HeartbeatQueue {
   size(): number {
     return this.queue.length;
   }
-
+  
   /**
    * Tries to resend every queued heartbeat.
    * Successful ones are removed. Failed ones get another
