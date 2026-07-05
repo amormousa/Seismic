@@ -195,6 +195,25 @@ paths:
       summary: Request a magic link
       tags:
       - auth
+  /api/auth/me:
+    get:
+      description: Returns the logged-in user's own profile info.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/helpers.APIResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/helpers.APIResponse'
+      security:
+      - BearerAuth: []
+      summary: Get current user
+      tags:
+      - auth
   /api/auth/refresh:
     post:
       description: Uses the refresh token cookie to issue a new access token and rotate
