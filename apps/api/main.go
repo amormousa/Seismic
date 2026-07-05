@@ -12,6 +12,7 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/fiber/v2/middleware/recover"
 	fiberSwagger "github.com/gofiber/swagger"
+	"github.com/majoramari/seismic/apps/api/middleware"
 
 	"github.com/majoramari/seismic/apps/api/config"
 	"github.com/majoramari/seismic/apps/api/db"
@@ -43,6 +44,7 @@ func main() {
 	app.Use(recover.New())
 	app.Use(logger.New())
 	app.Use(helmet.New())
+	app.Use(middleware.GeneralRateLimit())
 	app.Use(cors.New(cors.Config{
 		AllowOrigins:     cfg.AllowedOrigins,
 		AllowHeaders:     "Origin, Content-Type, Accept, Authorization",
