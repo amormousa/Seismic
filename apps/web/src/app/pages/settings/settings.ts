@@ -120,6 +120,11 @@ export class Settings implements OnInit {
   }
 
   resetTimers() {
+    const confirmed = confirm(
+      'This will permanently delete all your tracked coding time. This cannot be undone. Continue?',
+    );
+    if (!confirmed) return;
+
     this.api.post('/api/settings/reset-timers', {}).subscribe({
       next: () => this.toast.success('All coding stats have been reset'),
       error: () => this.toast.error('Failed to reset timers'),
