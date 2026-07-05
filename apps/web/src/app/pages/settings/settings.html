@@ -1,0 +1,207 @@
+<!-- pages/settings/settings.html -->
+<div class="page">
+  <h1>Settings for {{ '' }}</h1>
+  <p class="text-muted mb-6">Manage your API access, privacy, and account.</p>
+
+  <div class="settings-layout">
+    <nav class="settings-sidebar">
+      <button class="settings-sidebar-item" [class.active]="activeSection() === 'apikey'"
+              (click)="setSection('apikey')">
+        API Key
+      </button>
+      <button class="settings-sidebar-item" [class.active]="activeSection() === 'privacy'"
+              (click)="setSection('privacy')">
+        Privacy & Security
+      </button>
+      <button class="settings-sidebar-item" [class.active]="activeSection() === 'account'"
+              (click)="setSection('account')">
+        Account
+      </button>
+    </nav>
+
+    <div class="settings-panel">
+
+      @if (activeSection() === 'apikey') {
+        <div class="settings-pills">
+          <span class="settings-pill active">API Key</span>
+        </div>
+
+        <div class="card">
+          <h2 class="settings-section-title">API Key</h2>
+          <p class="text-muted">Use this key to connect your editor to Seismic.</p>
+
+          <div class="apikey-row">
+            <input
+              [type]="apiKeyVisible() ? 'text' : 'password'"
+              class="input apikey-input"
+              [value]="apiKey()"
+              readonly
+            />
+            <button class="btn-ghost" (click)="toggleApiKeyVisible()">
+              {{ apiKeyVisible() ? 'Hide' : 'Show' }}
+            </button>
+            <button class="btn-ghost" (click)="copyApiKey()">Copy</button>
+          </div>
+
+          <button
+            class="btn-primary mt-4"
+            [disabled]="regenerating()"
+            (click)="regenerateApiKey()"
+          >
+            {{ regenerating() ? 'Regenerating...' : 'Regenerate Key' }}
+          </button>
+          <p class="text-muted text-sm mt-2">
+            Regenerating invalidates your old key immediately. You'll need to update it in every editor.
+          </p>
+        </div>
+      }
+
+      @if (activeSection() === 'privacy' && privacy()) {
+        <div class="settings-pills">
+          <span class="settings-pill active">Privacy toggles</span>
+        </div>
+
+        <div class="card">
+          <h2 class="settings-section-title">Privacy</h2>
+
+          <div class="privacy-row">
+            <div>
+              <p class="privacy-label">Public profile</p>
+              <p class="text-muted text-sm">Let others view your profile and stats</p>
+            </div>
+            <label class="switch">
+              <input
+                type="checkbox"
+                [checked]="privacy()!.profilePublic"
+                (change)="toggleLocal('profilePublic', $any($event.target).checked)"
+              />
+              <span class="switch-track"></span>
+            </label>
+          </div>
+
+          <div class="privacy-row">
+            <div>
+              <p class="privacy-label">Hide coding time</p>
+              <p class="text-muted text-sm">Don't show your total time on your profile</p>
+            </div>
+            <label class="switch">
+              <input
+                type="checkbox"
+                [checked]="privacy()!.hideTime"
+                (change)="toggleLocal('hideTime', $any($event.target).checked)"
+              />
+              <span class="switch-track"></span>
+            </label>
+          </div>
+
+          <div class="privacy-row">
+            <div>
+              <p class="privacy-label">Hide projects</p>
+              <p class="text-muted text-sm">Don't show your project breakdown</p>
+            </div>
+            <label class="switch">
+              <input
+                type="checkbox"
+                [checked]="privacy()!.hideProjects"
+                (change)="toggleLocal('hideProjects', $any($event.target).checked)"
+              />
+              <span class="switch-track"></span>
+            </label>
+          </div>
+
+          <div class="privacy-row">
+            <div>
+              <p class="privacy-label">Hide languages</p>
+              <p class="text-muted text-sm">Don't show your language breakdown</p>
+            </div>
+            <label class="switch">
+              <input
+                type="checkbox"
+                [checked]="privacy()!.hideLanguages"
+                (change)="toggleLocal('hideLanguages', $any($event.target).checked)"
+              />
+              <span class="switch-track"></span>
+            </label>
+          </div>
+
+          <div class="privacy-row">
+            <div>
+              <p class="privacy-label">Hide from leaderboard</p>
+              <p class="text-muted text-sm">Exclude yourself from public leaderboards</p>
+            </div>
+            <label class="switch">
+              <input
+                type="checkbox"
+                [checked]="privacy()!.hideLeaderboard"
+                (change)="toggleLocal('hideLeaderboard', $any($event.target).checked)"
+              />
+              <span class="switch-track"></span>
+            </label>
+          </div>
+
+          <button
+            class="btn-primary mt-6"
+            [disabled]="!privacyDirty() || savingPrivacy()"
+            (click)="savePrivacy()"
+          >
+            {{ savingPrivacy() ? 'Saving...' : 'Save changes' }}
+          </button>
+        </div>
+      }
+
+      @if (activeSection() === 'account') {
+        <div class="settings-pills">
+          <span
+            class="settings-pill"
+            [class.active]="accountSubTab() === 'reset'"
+            (click)="setAccountSubTab('reset')"
+          >
+            Reset stats
+          </span>
+          <span
+            class="settings-pill"
+            [class.active]="accountSubTab() === 'delete'"
+            (click)="setAccountSubTab('delete')"
+          >
+            Delete account
+          </span>
+        </div>
+
+        @if (accountSubTab() === 'reset') {
+          <div class="card">
+            <h2 class="settings-section-title">Reset stats</h2>
+            <p class="text-muted">Permanently delete all your tracked coding time. This can't be undone.</p>
+            <button class="btn-ghost mt-4" (click)="resetTimers()">Reset all stats</button>
+          </div>
+        }
+
+        @if (accountSubTab() === 'delete') {
+          <div class="card danger-card">
+            <h2 class="settings-section-title">Delete account</h2>
+            <p class="text-muted">Permanently delete your account and all data. This can't be undone.</p>
+
+            @if (!showDeleteConfirm()) {
+              <button class="btn-danger mt-4" (click)="showDeleteConfirm.set(true)">Delete my account</button>
+            } @else {
+              <p class="text-sm mt-4">Type <strong>delete</strong> to confirm:</p>
+              <input
+                type="text"
+                class="input"
+                [ngModel]="deleteConfirmText()"
+                (ngModelChange)="deleteConfirmText.set($event)"
+              />
+              <button
+                class="btn-danger"
+                [disabled]="deleteConfirmText() !== 'delete'"
+                (click)="confirmDelete()"
+              >
+                Confirm deletion
+              </button>
+            }
+          </div>
+        }
+      }
+
+    </div>
+  </div>
+</div>

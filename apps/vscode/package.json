@@ -1,9 +1,15 @@
 {
-  "name": "seismic",
-  "displayName": "Seismic",
-  "description": "Track your coding time. Own your story.",
-  "version": "0.1.0",
-  "publisher": "seismic",
+  "name": "seismic-stats",
+  "displayName": "Seismic Stats",
+  "description": "Your code speaks. We listen.",
+  "version": "0.1.1",
+  "publisher": "muhannad",
+  "license": "GPL-3.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Majoramari/Seismic.git",
+    "directory": "apps/vscode"
+  },
   "engines": {
     "vscode": "^1.85.0"
   },
@@ -13,7 +19,7 @@
   "activationEvents": [
     "onStartupFinished"
   ],
-  "main": "./dist/extension.js",
+  "main": "dist/extension.js",
   "contributes": {
     "commands": [
       {
@@ -43,7 +49,7 @@
         },
         "seismic.apiUrl": {
           "type": "string",
-          "default": "https://api.seismic.icu",
+          "default": "https://correct-wolverine-majoramari-6049fd71.koyeb.app",
           "description": "Seismic API URL"
         },
         "seismic.enabled": {

@@ -41,6 +41,28 @@
   padding: var(--space-2) 0;
 }
 
+.login-confirmation {
+  text-align: center;
+}
+
+.login-confirmation-icon {
+  width: 72px;
+  height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto var(--space-6);
+  border-radius: 50%;
+  background: var(--color-accent-glow);
+  color: var(--color-accent-light);
+}
+
+.login-confirmation-icon lucide-angular,
+.login-confirmation-icon svg {
+  display: block;
+  flex-shrink: 0;
+}
+
 .login-footer {
   margin-top: var(--space-8);
   text-align: center;

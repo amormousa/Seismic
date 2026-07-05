@@ -2,18 +2,21 @@ import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { NgOptimizedImage } from '@angular/common';
+import { LucideAngularModule, Mailbox } from 'lucide-angular';
 import { ApiService } from '../../../core/api/api.service';
 import { ToastService } from '../../../core/toast/toast.service';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [FormsModule, RouterLink, NgOptimizedImage],
+  imports: [FormsModule, RouterLink, NgOptimizedImage, LucideAngularModule],
   templateUrl: './login.html',
 })
 export class Login {
   private api = inject(ApiService);
   private toast = inject(ToastService);
+
+  readonly MailboxIcon = Mailbox;
 
   email = signal('');
   loading = signal(false);

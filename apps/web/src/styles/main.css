@@ -7,10 +7,12 @@
 
 @import "./layers/components/buttons.css" layer(components);
 @import "./layers/components/inputs.css" layer(components);
+@import "./layers/components/leaderboard.css" layer(components);
 @import "./layers/components/card.css" layer(components);
 @import "./layers/components/navbar.css" layer(components);
 @import "./layers/components/sidebar.css" layer(components);
 @import "./layers/components/login.css" layer(components);
+@import "./layers/components/settings.css" layer(components);
 @import "./layers/components/onboarding.css" layer(components);
 @import "./layers/components/toast.css" layer(components);
 

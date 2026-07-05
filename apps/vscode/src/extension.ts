@@ -9,6 +9,8 @@ import { StatusBarManager } from './statusbar';
  * when it shuts down.
  */
 export function activate(context: vscode.ExtensionContext) {
+  config.configureDefaultApiUrl(context.extensionMode === vscode.ExtensionMode.Development);
+
   const heartbeat = new HeartbeatService();
   const statusBar = new StatusBarManager();
 

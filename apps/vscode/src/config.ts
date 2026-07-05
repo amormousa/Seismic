@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import { getDefaultApiUrl } from './apiUrls';
 import { readGlobalConfig, writeGlobalConfig } from './globalConfig';
 
 /**
@@ -14,6 +15,12 @@ import { readGlobalConfig, writeGlobalConfig } from './globalConfig';
 
 const SECTION = 'seismic';
 
+let defaultApiUrl = getDefaultApiUrl();
+
+export function configureDefaultApiUrl(isDevelopment: boolean): void {
+  defaultApiUrl = getDefaultApiUrl(isDevelopment);
+}
+
 export function getApiKey(): string {
   const vsCodeKey = vscode.workspace.getConfiguration(SECTION).get<string>('apiKey', '');
   if (vsCodeKey) return vsCodeKey;
@@ -25,11 +32,19 @@ export function getApiKey(): string {
 }
 
 export function getApiUrl(): string {
-  const vsCodeUrl = vscode.workspace.getConfiguration(SECTION).get<string>('apiUrl', '');
+  const vsCodeUrl = getConfiguredApiUrl();
   if (vsCodeUrl) return vsCodeUrl;
 
   const global = readGlobalConfig();
-  return global?.apiUrl ?? 'https://api.seismic.icu';
+  return global?.apiUrl ?? defaultApiUrl;
+}
+
+function getConfiguredApiUrl(): string {
+  const inspected = vscode.workspace.getConfiguration(SECTION).inspect<string>('apiUrl');
+  const value =
+    inspected?.workspaceFolderValue ?? inspected?.workspaceValue ?? inspected?.globalValue ?? '';
+
+  return value.trim();
 }
 
 export function isEnabled(): boolean {

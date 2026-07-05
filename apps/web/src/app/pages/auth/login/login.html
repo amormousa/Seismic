@@ -13,7 +13,7 @@
           <input
             type="email"
             class="input"
-            placeholder="you@example.com"
+            placeholder="Enter your email"
             [(ngModel)]="email"
             (keydown.enter)="requestMagicLink()"
           />
@@ -34,7 +34,9 @@
         </p>
       } @else {
         <div class="login-confirmation">
-          <div class="login-confirmation-icon">✉</div>
+          <div class="login-confirmation-icon">
+            <lucide-angular [img]="MailboxIcon" [size]="36" />
+          </div>
           <h1 class="login-title">Check your email</h1>
           <p class="login-subtitle">We sent a login link to<br><strong>{{ email() }}</strong></p>
         </div>
@@ -46,8 +48,8 @@
     <img
       ngSrc="images/login-hero.png"
       alt=""
-      fill
-      priority
+      fill=""
+      priority=""
       class="split-hero-image"
     />
   </div>

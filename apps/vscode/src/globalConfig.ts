@@ -1,6 +1,7 @@
 import * as fs from 'node:fs';
 import * as os from 'node:os';
 import * as path from 'node:path';
+import { PUBLISHED_API_URL } from './apiUrls';
 
 /**
  * Reads and writes a shared config file at ~/.seismic.cfg
@@ -24,7 +25,7 @@ export function readGlobalConfig(): GlobalConfig | null {
 
   if (!apiKey) return null;
 
-  return { apiKey, apiUrl: apiUrl || 'https://api.seismic.icu' };
+  return { apiKey, apiUrl: apiUrl || PUBLISHED_API_URL };
 }
 
 export function writeGlobalConfig(config: GlobalConfig): void {

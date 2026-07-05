@@ -29,6 +29,14 @@ func Setup(app *fiber.App, authHandler *handlers.AuthHandler, heartbeatHandler *
 	leaderboardHandler := &handlers.LeaderboardHandler{Pool: pool}
 	app.Get("/api/leaderboard", leaderboardHandler.GetLeaderboard)
 
+	settingsHandler := &handlers.SettingsHandler{Pool: pool}
+
+	settings := app.Group("/api/settings", middleware.RequireAuth(jwtSecret))
+	settings.Get("/privacy", settingsHandler.GetPrivacy)
+	settings.Post("/privacy", settingsHandler.UpdatePrivacy)
+	settings.Post("/reset-timers", settingsHandler.ResetTimers)
+	settings.Post("/account", settingsHandler.DeleteAccount)
+
 	// This is a testing route, not for production use
 	app.Post("/api/admin/process-sessions", middleware.RequireAuth(jwtSecret), adminHandler.TriggerSessionProcessing)
 }
