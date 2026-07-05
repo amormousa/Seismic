@@ -62,7 +62,12 @@ func GetStatsSummary(ctx context.Context, pool *pgxpool.Pool, userID string, ran
 	}
 
 	s.DailyAverage = s.TotalSeconds // refine later
-	s.CurrentStreak = 0             // built later, needs day-by-day logic
+
+	streak, err := GetCurrentStreak(ctx, pool, userID)
+	if err != nil {
+		return nil, err
+	}
+	s.CurrentStreak = streak
 
 	return &s, nil
 }
@@ -131,4 +136,54 @@ func GetHeatmap(ctx context.Context, pool *pgxpool.Pool, userID string) ([]Heatm
 		days = append(days, HeatmapDay{Date: day.Format("2006-01-02"), Seconds: seconds})
 	}
 	return days, nil
+}
+
+// GetCurrentStreak returns how many consecutive days (ending
+// today or yesterday) the user has coded at least once.
+func GetCurrentStreak(ctx context.Context, pool *pgxpool.Pool, userID string) (int, error) {
+	rows, err := pool.Query(ctx, `
+		SELECT DISTINCT start_time::date as day
+		FROM sessions
+		WHERE user_id = $1
+		ORDER BY day DESC
+	`, userID)
+	if err != nil {
+		return 0, err
+	}
+	defer rows.Close()
+
+	var days []time.Time
+	for rows.Next() {
+		var d time.Time
+		if err := rows.Scan(&d); err != nil {
+			return 0, err
+		}
+		days = append(days, d)
+	}
+
+	if len(days) == 0 {
+		return 0, nil
+	}
+
+	today := time.Now().Truncate(24 * time.Hour)
+	streak := 0
+	expected := today
+
+	// Allow the streak to still count if today has no activity
+	// yet but yesterday does (streak isn't broken until a full
+	// day passes with nothing logged).
+	if !days[0].Equal(today) {
+		expected = today.AddDate(0, 0, -1)
+	}
+
+	for _, d := range days {
+		if d.Equal(expected) {
+			streak++
+			expected = expected.AddDate(0, 0, -1)
+		} else {
+			break
+		}
+	}
+
+	return streak, nil
 }
