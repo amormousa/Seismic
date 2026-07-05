@@ -19,6 +19,7 @@ func Setup(app *fiber.App, authHandler *handlers.AuthHandler, heartbeatHandler *
 	auth.Post("/apikey/regenerate", middleware.RequireAuth(jwtSecret), authHandler.RegenerateAPIKey)
 	auth.Post("/magic-link", middleware.AuthRateLimit(), authHandler.RequestMagicLink)
 	app.Post("/api/heartbeat", middleware.HeartbeatRateLimit(), middleware.RequireAPIKey(pool), heartbeatHandler.Receive)
+	auth.Get("/me", middleware.RequireAuth(jwtSecret), authHandler.GetMe)
 	auth.Get("/check-username", authHandler.CheckUsername)
 
 	stats := app.Group("/api/stats", middleware.RequireAuthOrAPIKey(pool, jwtSecret))
