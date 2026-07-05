@@ -246,13 +246,13 @@ func (h *AuthHandler) RefreshAccessToken(c *fiber.Ctx) error {
 // cookie so client-side JavaScript can never read it directly.
 // Secure is disabled for local http testing, enabled in
 // production where everything runs over https.
-func setRefreshTokenCookie(c *fiber.Ctx, token string, secure bool) {
+func setRefreshTokenCookie(c *fiber.Ctx, token string) {
 	c.Cookie(&fiber.Cookie{
 		Name:     "refresh_token",
 		Value:    token,
 		HTTPOnly: true,
-		Secure:   secure,
-		SameSite: "Strict",
+		Secure:   true,
+		SameSite: "None",
 		Path:     "/api/auth",
 		Expires:  time.Now().Add(30 * 24 * time.Hour),
 	})
