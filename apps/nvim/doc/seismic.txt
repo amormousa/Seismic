@@ -24,12 +24,13 @@ LAZY.NVIM ~
 >
   {
     'Majoramari/Seismic',
-    dir = 'apps/nvim',
-    config = function()
-      require('seismic').setup({
-        -- your config here
-      })
-    end,
+    main = 'seismic',
+    event = 'VeryLazy',
+    opts = {
+      -- api_key = 'your-api-key-goes-here',
+      -- api_url = 'https://correct-wolverine-majoramari-6049fd71.koyeb.app',
+      -- enabled = true,
+    },
   }
 <
 PACKER.NVIM ~
@@ -50,11 +51,17 @@ SETUP                                        *seismic-setup*
 The only required configuration is your `api_key`. You can get one from
 https://seismic.icu/settings.
 
-You can either set it in the `setup` function:
+You can either set it with `opts` in your LazyVim/lazy.nvim plugin
+configuration:
 >
-  require('seismic').setup({
-    api_key = 'your-api-key-goes-here',
-  })
+  {
+    'Majoramari/Seismic',
+    main = 'seismic',
+    event = 'VeryLazy',
+    opts = {
+      api_key = 'your-api-key-goes-here',
+    },
+  }
 <
 Or you can use the |:SeismicSetApiKey| command after installation. The key
 will be persisted locally so you don't have to set it every time.

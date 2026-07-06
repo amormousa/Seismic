@@ -16,14 +16,13 @@ If you are using LazyVim, you typically place your plugin configurations in
 ```lua
 return {
   'Majoramari/Seismic',
-  -- For monorepos, specify the subdirectory where the plugin resides
-  rtp = 'apps/nvim',
+  main = 'seismic',
   event = 'VeryLazy', -- Or 'BufEnter' for more specific activation
-  config = function()
-    require('seismic').setup({
-      -- your config here
-    })
-  end,
+  opts = {
+    -- api_key = 'your-api-key-goes-here',
+    -- api_url = 'https://correct-wolverine-majoramari-6049fd71.koyeb.app',
+    -- enabled = true,
+  },
 }
 ```
 
@@ -32,12 +31,18 @@ return {
 The only required configuration is your `api_key`. You can get one from
 [seismic.icu/settings](https://seismic.icu/settings).
 
-You can either set it in the `setup` function within your plugin configuration:
+You can either set it with `opts` in your LazyVim/lazy.nvim plugin
+configuration:
 
 ```lua
-require('seismic').setup({
-  api_key = 'your-api-key-goes-here',
-})
+return {
+  'Majoramari/Seismic',
+  main = 'seismic',
+  event = 'VeryLazy',
+  opts = {
+    api_key = 'your-api-key-goes-here',
+  },
+}
 ```
 
 Or you can use the `:SeismicSetApiKey` command after installation. The key
