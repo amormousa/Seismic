@@ -25,4 +25,16 @@ export class ApiService {
       .post<ApiResponse<T>>(`${this.baseUrl}${path}`, body, { withCredentials: true })
       .pipe(map((res) => res.data));
   }
+
+  put<T>(path: string, body: unknown) {
+    return this.http
+      .put<ApiResponse<T>>(`${this.baseUrl}${path}`, body, { withCredentials: true })
+      .pipe(map((res) => res.data));
+  }
+
+  delete<T>(path: string) {
+    return this.http
+      .delete<ApiResponse<T>>(`${this.baseUrl}${path}`, { withCredentials: true })
+      .pipe(map((res) => res.data));
+  }
 }

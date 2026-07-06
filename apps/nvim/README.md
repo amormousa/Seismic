@@ -5,28 +5,20 @@ heartbeats to the Seismic API.
 
 ## Installation
 
-Install with your favorite plugin manager.
+Install with your favorite plugin manager, `lazy.nvim`.
 
-### [lazy.nvim](https://github.com/folke/lazy.nvim)
+### [lazy.nvim](https://github.com/folke/lazy.nvim) (and LazyVim)
 
-```lua
-{
-  'Majoramari/Seismic',
-  dir = 'apps/nvim',
-  config = function()
-    require('seismic').setup({
-      -- your config here
-    })
-  end,
-}
-```
-
-### [packer.nvim](https://github.com/wbthomason/packer.nvim)
+If you are using LazyVim, you typically place your plugin configurations in
+`~/.config/nvim/lua/plugins/`. Create a new file there, for example,
+`~/.config/nvim/lua/plugins/seismic.lua`, and add the following content:
 
 ```lua
-use {
+return {
   'Majoramari/Seismic',
-  run = 'cd apps/nvim && make', -- Or manually build
+  -- For monorepos, specify the subdirectory where the plugin resides
+  rtp = 'apps/nvim',
+  event = 'VeryLazy', -- Or 'BufEnter' for more specific activation
   config = function()
     require('seismic').setup({
       -- your config here
@@ -40,7 +32,7 @@ use {
 The only required configuration is your `api_key`. You can get one from
 [seismic.icu/settings](https://seismic.icu/settings).
 
-You can either set it in the `setup` function:
+You can either set it in the `setup` function within your plugin configuration:
 
 ```lua
 require('seismic').setup({

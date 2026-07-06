@@ -68,4 +68,6 @@ function M.setup(user_config)
   end
 end
 
+M.config = M.setup
+
 return M
