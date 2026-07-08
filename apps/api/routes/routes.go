@@ -11,6 +11,12 @@ import (
 func Setup(app *fiber.App, authHandler *handlers.AuthHandler, heartbeatHandler *handlers.HeartbeatHandler, adminHandler *handlers.AdminHandler, statsHandler *handlers.StatsHandler, filtersHandler *handlers.FiltersHandler, jwtSecret string, pool *pgxpool.Pool) {
 	app.Get("/health", handlers.HealthCheck)
 
+	// Profile route – TEMP DEV: unprotected so we can view the page without login
+	profileHandler := &handlers.ProfileHandler{Pool: pool}
+	app.Get("/api/profile", profileHandler.GetProfile)
+	app.Patch("/api/profile", profileHandler.UpdateProfile)
+
+
 	auth := app.Group("/api/auth")
 	auth.Get("/verify", authHandler.VerifyMagicLink)
 	auth.Post("/complete-signup", authHandler.CompleteSignup)

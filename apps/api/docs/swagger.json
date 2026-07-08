@@ -548,8 +548,6 @@
                 }
             }
         },
-<<<<<<< HEAD
-=======
         "/api/profile": {
             "get": {
                 "security": [
@@ -579,9 +577,51 @@
                         }
                     }
                 }
+            },
+            "patch": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Updates allowed fields on the user profile",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "profile"
+                ],
+                "summary": "Update user profile",
+                "parameters": [
+                    {
+                        "description": "Profile update details",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.UpdateProfileRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/helpers.APIResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/helpers.APIResponse"
+                        }
+                    }
+                }
             }
         },
->>>>>>> cb826e2 (feat: add user profile page and improve Swagger API documentation)
         "/api/settings/account": {
             "post": {
                 "security": [
@@ -849,8 +889,6 @@
                 }
             }
         },
-<<<<<<< HEAD
-=======
         "models.Achievement": {
             "type": "object",
             "properties": {
@@ -885,7 +923,6 @@
                 }
             }
         },
->>>>>>> cb826e2 (feat: add user profile page and improve Swagger API documentation)
         "models.Heartbeat": {
             "type": "object",
             "properties": {
@@ -918,13 +955,10 @@
                 },
                 "time": {
                     "type": "integer"
-                },
                 "timezone": {
                     "type": "string"
                 }
             }
-<<<<<<< HEAD
-=======
         },
         "models.HeatmapCell": {
             "type": "object",
@@ -992,6 +1026,9 @@
                 "completionPercent": {
                     "type": "integer"
                 },
+                "currentStreak": {
+                    "type": "integer"
+                },
                 "email": {
                     "type": "string"
                 },
@@ -1052,6 +1089,9 @@
                 "totalActiveDays": {
                     "type": "integer"
                 },
+                "totalCodingSeconds": {
+                    "type": "integer"
+                },
                 "totalProblems": {
                     "type": "integer"
                 },
@@ -1062,7 +1102,41 @@
                     "type": "string"
                 }
             }
->>>>>>> cb826e2 (feat: add user profile page and improve Swagger API documentation)
+        },
+        "models.UpdateProfileRequest": {
+            "type": "object",
+            "properties": {
+                "firstName": {
+                    "type": "string"
+                },
+                "bio": {
+                    "type": "string"
+                },
+                "location": {
+                    "type": "string"
+                },
+                "role": {
+                    "type": "string"
+                },
+                "university": {
+                    "type": "string"
+                },
+                "website": {
+                    "type": "string"
+                },
+                "gender": {
+                    "type": "string"
+                },
+                "languages": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "timeZone": {
+                    "type": "string"
+                }
+            }
         }
     },
     "securityDefinitions": {
