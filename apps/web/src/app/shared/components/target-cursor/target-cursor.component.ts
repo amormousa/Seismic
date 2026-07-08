@@ -1,7 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, Input, NgZone, OnDestroy, OnInit, inject } from '@angular/core';
 import { gsap } from 'gsap';
-import type { GSAPTimeline } from 'gsap';
 
 
 // A position: fixed element is positioned relative to the viewport UNLESS an

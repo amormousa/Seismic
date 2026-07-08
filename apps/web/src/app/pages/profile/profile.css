@@ -1,3 +1,5 @@
+@import '../../shared/components/magic-bento/magic-bento.css';
+
 :host {
   display: block;
 }

@@ -19,7 +19,6 @@ export const routes: Routes = [
   },
   { path: 'leaderboard', component: Leaderboard, title: 'Leaderboard — Seismic' },
   { path: 'settings', component: Settings, canActivate: [authGuard], title: 'Settings — Seismic' },
-  // TEMP DEV: Removed authGuard so we can view the page without login
-  { path: 'profile', component: Profile, title: 'Profile — Seismic' },
+  { path: 'profile', component: Profile, canActivate: [authGuard], title: 'Profile — Seismic' },
 ];
 

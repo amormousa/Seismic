@@ -118,17 +118,20 @@
       </button>
     </section>
   </div>
-
-  <!-- ═══ Core Coding Metrics ═══ -->
-  <div class="metrics-row">
+  <!-- ═══ Core Coding Metrics (Bento Style) ═══ -->
+  <div class="card-grid bento-section" appMagicBento>
     @for (metric of metrics; track metric.label) {
-    <div class="metric-card">
-      <div class="metric-icon" [class]="metric.iconClass">
-        <lucide-angular [img]="metric.icon" [size]="20" />
+    <div class="magic-bento-card" appMagicBentoCard>
+      <div class="magic-bento-card__header" style="align-items: center;">
+        <div class="metric-icon" [class]="metric.iconClass" style="margin-bottom: 0;">
+          <lucide-angular [img]="metric.icon" [size]="20" />
+        </div>
+        <div class="magic-bento-card__label" style="text-align: right;">{{ metric.label }}</div>
       </div>
-      <div class="metric-label">{{ metric.label }}</div>
-      <div class="metric-value">{{ metric.value }}</div>
-      <div class="metric-sub" [class.positive]="metric.positive">{{ metric.sub }}</div>
+      <div class="magic-bento-card__content">
+        <h2 class="magic-bento-card__title" style="font-size: 22px; font-weight: 800; letter-spacing: 0.5px; margin-bottom: 8px;">{{ metric.value }}</h2>
+        <p class="magic-bento-card__description" [class.positive]="metric.positive">{{ metric.sub }}</p>
+      </div>
     </div>
     }
   </div>

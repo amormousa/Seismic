@@ -27,15 +27,8 @@ type ProfileHandler struct {
 // @Failure      401 {object} helpers.APIResponse
 // @Router       /api/profile [get]
 func (h *ProfileHandler) GetProfile(c *fiber.Ctx) error {
-	// userID := c.Locals("userID").(string) // TEMP DEV: Disabled
+	userID := c.Locals("userID").(string)
 	ctx := c.Context()
-
-	// TEMP DEV: Find the testuser's ID
-	var userID string
-	_ = h.Pool.QueryRow(ctx, "SELECT id FROM users WHERE username = 'sarahchen' LIMIT 1").Scan(&userID)
-	if userID == "" {
-		return helpers.Error(c, fiber.StatusNotFound, "sarahchen not found, please run seed_dummy_data.sql")
-	}
 
 
 
@@ -312,15 +305,8 @@ func secondsToLevel(sec int) int {
 // @Failure      400 {object} helpers.APIResponse
 // @Router       /api/profile [patch]
 func (h *ProfileHandler) UpdateProfile(c *fiber.Ctx) error {
-	// userID := c.Locals("userID").(string) // TEMP DEV: Disabled
+	userID := c.Locals("userID").(string)
 	ctx := c.Context()
-
-	// TEMP DEV: Find the testuser's ID
-	var userID string
-	_ = h.Pool.QueryRow(ctx, "SELECT id FROM users WHERE username = 'sarahchen' LIMIT 1").Scan(&userID)
-	if userID == "" {
-		return helpers.Error(c, fiber.StatusNotFound, "sarahchen not found")
-	}
 
 	var req models.UpdateProfileRequest
 	if err := c.BodyParser(&req); err != nil {

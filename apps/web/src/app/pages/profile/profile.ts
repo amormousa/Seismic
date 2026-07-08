@@ -32,7 +32,7 @@ import {
   Link as LinkIcon,
 } from 'lucide-angular';
 import { ProfileService, ProfileResponse, HeatmapCell, Achievement, ActivityLogItem, UpdateProfileRequest } from './profile.service';
-
+import { MagicBentoDirective, MagicBentoCardDirective } from '../../shared/components/magic-bento/magic-bento.directive';
 // ── Local display interfaces (icons are frontend-only) ────────────────────────
 
 interface Metric {
@@ -67,7 +67,7 @@ interface DisplayInfoField {
 @Component({
   selector: 'app-profile',
   standalone: true,
-  imports: [LucideAngularModule, FormsModule],
+  imports: [LucideAngularModule, FormsModule, MagicBentoDirective, MagicBentoCardDirective],
   templateUrl: './profile.html',
   styleUrl: './profile.css',
 })
